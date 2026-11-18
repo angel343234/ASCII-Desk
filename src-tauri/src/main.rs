@@ -383,7 +383,7 @@ fn rebuild_tray_menu(app: &AppHandle, state: &Arc<Mutex<EngineState>>) {
     let Ok(item_config) = MenuItem::with_id(
         app,
         "open_panel",
-        "Abrir ASCII & Shader Studio",
+        "Abrir ASCII Desk",
         true,
         None::<&str>,
     ) else {
@@ -470,7 +470,7 @@ fn show_studio_window(app: &AppHandle) {
         "panel",
         WebviewUrl::App("index.html?role=panel".into()),
     )
-    .title("ASCII & Shader Wallpaper Studio")
+    .title("ASCII Desk")
     .inner_size(1100.0, 720.0)
     .min_inner_size(900.0, 600.0)
     .decorations(false)
@@ -974,7 +974,7 @@ fn main() {
 
             let _tray = TrayIconBuilder::with_id("main-tray")
                 .icon(icon)
-                .tooltip("ASCII & Shader Wallpaper Studio")
+                .tooltip("ASCII Desk")
                 .on_tray_icon_event(|tray, event| {
                     if let TrayIconEvent::Click {
                         button: MouseButton::Left,

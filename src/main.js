@@ -446,7 +446,7 @@
       const styleObj = window.ShaderRegistry.getStyleById(draftShader.styleId);
       shaderSelect.value = styleObj.id;
       shaderDesc.textContent = styleObj.description;
-      hudStyleLabel.textContent = `Shader: ${styleObj.name}`;
+      hudStyleLabel.textContent = `Efecto: ${styleObj.name}`;
 
       document.getElementById("sh-cellSize").value = draftShader.cellSize;
       document.getElementById("val-cellSize").textContent = `${draftShader.cellSize} px`;
@@ -829,14 +829,14 @@
       if (titlebarCoords) {
         const px = String(Math.max(0, Math.round(e.clientX - r.left))).padStart(4, "0");
         const py = String(Math.max(0, Math.round(e.clientY - r.top))).padStart(4, "0");
-        titlebarCoords.textContent = `X:${px} Y:${py} // 1:1_UNIT`;
+        titlebarCoords.textContent = `X:${px} Y:${py}`;
       }
     });
 
-    // Apply as Desktop Wallpaper CTA
+    // Apply as Desktop Wallpaper CTA (subtle black & white monochrome icon, no emojis)
     btnApplyWallpaper.addEventListener("click", async () => {
-      const origText = btnApplyWallpaper.textContent;
-      btnApplyWallpaper.textContent = "✅ ¡Aplicado al Escritorio!";
+      const origText = "Aplicar al escritorio";
+      btnApplyWallpaper.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-1px;margin-right:6px;"><polyline points="2 6.5 4.8 9.2 10 3"/></svg>Aplicado al escritorio`;
       try {
         await invoke("apply_studio_wallpaper", {
           sourceType: draftSourceType,
@@ -849,7 +849,7 @@
       }
       setTimeout(() => {
         btnApplyWallpaper.textContent = origText;
-      }, 1400);
+      }, 1500);
     });
 
     // Export PNG Snapshot
@@ -884,8 +884,8 @@
       if (!targetCanvas.captureStream) return;
 
       isRecording = true;
-      const origLabel = btnExportWebm.textContent;
-      btnExportWebm.textContent = "🔴 Grabando 5s...";
+      const origLabel = "Grabar video WebM (5s)";
+      btnExportWebm.textContent = "[Grabando 5s...]";
 
       const stream = targetCanvas.captureStream(60);
       const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
@@ -914,16 +914,16 @@
     });
 
     function updateStatusUI(paused, autoPaused) {
-      btnPause.textContent = paused ? "▶" : "⏸";
+      btnPause.textContent = paused ? "|>" : "II";
       btnPause.title = paused ? "Reanudar fondo" : "Pausar fondo";
       if (autoPaused) {
-        statusBadge.textContent = "Ahorro Automático (App Maximizada)";
+        statusBadge.textContent = "Ahorro Automático (Ventana Maximizada)";
         statusBadge.classList.add("paused");
       } else if (paused) {
         statusBadge.textContent = "Fondo Pausado";
         statusBadge.classList.add("paused");
       } else {
-        statusBadge.textContent = "Motor Activo · 60 FPS WebGL2";
+        statusBadge.textContent = "Motor Activo · 60 FPS";
         statusBadge.classList.remove("paused");
       }
     }
