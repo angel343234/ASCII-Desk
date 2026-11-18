@@ -4,22 +4,22 @@
   "media_path": "C:\\Users\\angel\\Downloads\\Horse_gallop.gif",
   "shader": {
     "animSpeed": 0.8,
-    "bevel": 0.15,
-    "bgColor": "#000000",
+    "bevel": 0.05,
+    "bgColor": "#ffffff",
     "blendMode": 0,
     "brightness": 0.32,
     "cellSize": 4,
     "charset": " .:-=+*xX80$#@",
     "contrast": 2.2,
     "dotGrid": false,
-    "fgColor": "#ffffff",
-    "fitMode": 1,
-    "intensity": 1.12,
+    "fgColor": "#000000",
+    "fitMode": 0,
+    "intensity": 1,
     "invert": false,
     "lightAngle": 20,
     "opacity": 1,
     "palette": 0,
-    "param1": 0.56,
+    "param1": 1,
     "param2": 0.5,
     "relief": 0,
     "saturation": 0.4,
@@ -31,18 +31,18 @@
   "hide_desktop_icons": false,
   "span_monitors": false,
   "settings": {
+    "ascii-koi": {
+      "speed": 1.0,
+      "showClock": false,
+      "paused": false,
+      "theme": "pond"
+    },
     "matrix-rain": {
+      "color": "#00ff66",
       "paused": false,
       "charset": "katakana",
-      "speed": 1.0,
-      "color": "#00ff66",
-      "density": 0.85
-    },
-    "ascii-koi": {
-      "paused": false,
-      "speed": 1.0,
-      "theme": "pond",
-      "showClock": false
+      "density": 0.85,
+      "speed": 1.0
     }
   }
 }

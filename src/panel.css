@@ -99,7 +99,14 @@ html, body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.brand-horse-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  image-rendering: pixelated;
 }
 
 .brand-glyph {
