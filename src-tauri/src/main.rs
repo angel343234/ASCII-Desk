@@ -13,7 +13,7 @@ use tauri::{
     http::{header::CONTENT_TYPE, Response, StatusCode},
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder,
+    AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder,
 };
 use winreg::enums::*;
 use winreg::RegKey;
@@ -453,15 +453,7 @@ fn rebuild_tray_menu(app: &AppHandle, state: &Arc<Mutex<EngineState>>) {
 
 fn show_studio_window(app: &AppHandle) {
     if let Some(panel) = app.get_webview_window("panel") {
-        unsafe {
-            let screen_w = windows_sys::Win32::UI::WindowsAndMessaging::GetSystemMetrics(0);
-            let screen_h = windows_sys::Win32::UI::WindowsAndMessaging::GetSystemMetrics(1);
-            let win_w = 1100;
-            let win_h = 720;
-            let x = ((screen_w - win_w) / 2).max(20);
-            let y = ((screen_h - win_h) / 2).max(20);
-            let _ = panel.set_position(PhysicalPosition::new(x, y));
-        }
+        let _ = panel.center();
         let _ = panel.show();
         let _ = panel.set_focus();
         let _ = app.emit("panel-visibility", true);
@@ -474,12 +466,25 @@ fn show_studio_window(app: &AppHandle) {
     .inner_size(1100.0, 720.0)
     .min_inner_size(900.0, 600.0)
     .decorations(false)
+    .shadow(false)
     .resizable(true)
     .skip_taskbar(true)
-    .visible(true)
+    .visible(false)
     .center()
     .build()
     {
+        if let Ok(hwnd) = panel.hwnd() {
+            win32_desktop::register_panel_hwnd(hwnd.0 as isize);
+            unsafe {
+                let corner_pref: u32 = 1; // DWMWCP_DONOTROUND
+                let _ = windows_sys::Win32::Graphics::Dwm::DwmSetWindowAttribute(
+                    hwnd.0 as _,
+                    windows_sys::Win32::Graphics::Dwm::DWMWA_WINDOW_CORNER_PREFERENCE as u32,
+                    &corner_pref as *const _ as *const _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+            }
+        }
         let panel_clone = panel.clone();
         let app_clone = app.clone();
         panel.on_window_event(move |event| {
@@ -489,6 +494,8 @@ fn show_studio_window(app: &AppHandle) {
                 let _ = app_clone.emit("panel-visibility", false);
             }
         });
+        let _ = panel.center();
+        let _ = panel.show();
         let _ = panel.set_focus();
         let _ = app.emit("panel-visibility", true);
     }
@@ -958,9 +965,9 @@ fn main() {
                     }
                     let _ = win32_desktop::attach_to_desktop(hwnd_val, initial_span);
                     std::thread::sleep(Duration::from_millis(600));
-                    let _ = win32_desktop::attach_to_desktop(hwnd_val, initial_span);
+                    win32_desktop::update_wallpaper_bounds(initial_span);
                     std::thread::sleep(Duration::from_millis(1200));
-                    let _ = win32_desktop::attach_to_desktop(hwnd_val, initial_span);
+                    win32_desktop::update_wallpaper_bounds(initial_span);
                 });
             }
 

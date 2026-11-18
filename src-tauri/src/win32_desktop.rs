@@ -41,8 +41,13 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
 static WORKERW_HWND: AtomicIsize = AtomicIsize::new(0);
 static SHELL_DEFVIEW_HWND: AtomicIsize = AtomicIsize::new(0);
 static WALLPAPER_HWND: AtomicIsize = AtomicIsize::new(0);
+static PANEL_HWND: AtomicIsize = AtomicIsize::new(0);
 static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 static SYSTEM_PAUSED: AtomicBool = AtomicBool::new(false);
+
+pub fn register_panel_hwnd(hwnd_isize: isize) {
+    PANEL_HWND.store(hwnd_isize, Ordering::SeqCst);
+}
 
 // Stored bounds of the wallpaper in screen coordinates for accurate mouse mapping
 static WP_SCREEN_X: AtomicI32 = AtomicI32::new(0);
@@ -169,39 +174,45 @@ pub fn attach_to_desktop(hwnd_isize: isize, span_monitors: bool) -> Result<(), S
             WORKERW_HWND.store(target_parent as isize, Ordering::SeqCst);
         }
 
-        // Strip all frame/border/caption styles
-        let style = GetWindowLongPtrW(hwnd, GWL_STYLE);
-        let strip_mask = (WS_CAPTION
-            | WS_THICKFRAME
-            | WS_BORDER
-            | WS_DLGFRAME
-            | WS_SYSMENU
-            | WS_OVERLAPPEDWINDOW) as isize;
-
-        let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-        let strip_ex = (WS_EX_DLGMODALFRAME
-            | WS_EX_WINDOWEDGE
-            | WS_EX_CLIENTEDGE
-            | WS_EX_STATICEDGE
-            | WS_EX_APPWINDOW) as isize;
-        SetWindowLongPtrW(
-            hwnd,
-            GWL_EXSTYLE,
-            (ex_style & !strip_ex) | (WS_EX_TOOLWINDOW as isize) | (WS_EX_NOACTIVATE as isize),
-        );
-
-        let new_style = (style & !strip_mask)
-            | (WS_POPUP as isize)
-            | (WS_VISIBLE as isize)
-            | (WS_CLIPSIBLINGS as isize)
-            | (WS_CLIPCHILDREN as isize);
-        SetWindowLongPtrW(hwnd, GWL_STYLE, new_style);
-
+        // Only attach if we already have the proper parent
+        let current_parent = GetParent(hwnd);
         if !target_parent.is_null() {
-            SetParent(hwnd, target_parent);
-            let child_style = (new_style & !(WS_POPUP as isize)) | (WS_CHILD as isize);
-            SetWindowLongPtrW(hwnd, GWL_STYLE, child_style);
-            ShowWindow(target_parent, SW_SHOW);
+            if current_parent != target_parent {
+                // Strip all frame/border/caption styles
+                let style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+                let strip_mask = (WS_CAPTION
+                    | WS_THICKFRAME
+                    | WS_BORDER
+                    | WS_DLGFRAME
+                    | WS_SYSMENU
+                    | WS_OVERLAPPEDWINDOW) as isize;
+
+                let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+                let strip_ex = (WS_EX_DLGMODALFRAME
+                    | WS_EX_WINDOWEDGE
+                    | WS_EX_CLIENTEDGE
+                    | WS_EX_STATICEDGE
+                    | WS_EX_APPWINDOW) as isize;
+                SetWindowLongPtrW(
+                    hwnd,
+                    GWL_EXSTYLE,
+                    (ex_style & !strip_ex)
+                        | (WS_EX_TOOLWINDOW as isize)
+                        | (WS_EX_NOACTIVATE as isize),
+                );
+
+                let new_style = (style & !strip_mask)
+                    | (WS_POPUP as isize)
+                    | (WS_VISIBLE as isize)
+                    | (WS_CLIPSIBLINGS as isize)
+                    | (WS_CLIPCHILDREN as isize);
+                SetWindowLongPtrW(hwnd, GWL_STYLE, new_style);
+
+                SetParent(hwnd, target_parent);
+                let child_style = (new_style & !(WS_POPUP as isize)) | (WS_CHILD as isize);
+                SetWindowLongPtrW(hwnd, GWL_STYLE, child_style);
+                ShowWindow(target_parent, SW_SHOW);
+            }
             update_wallpaper_bounds(span_monitors);
             ShowWindow(hwnd, SW_SHOW);
         } else {
@@ -331,8 +342,16 @@ unsafe fn is_point_on_desktop(pt: POINT) -> bool {
     }
 
     let wp_hwnd = WALLPAPER_HWND.load(Ordering::SeqCst) as HWND;
+    let panel_hwnd = PANEL_HWND.load(Ordering::SeqCst) as HWND;
     let workerw_hwnd = WORKERW_HWND.load(Ordering::SeqCst) as HWND;
     let defview_hwnd = SHELL_DEFVIEW_HWND.load(Ordering::SeqCst) as HWND;
+
+    // Never treat the Studio Panel window (or any child of it) as desktop surface
+    if !panel_hwnd.is_null() {
+        if hwnd == panel_hwnd || GetAncestor(hwnd, GA_ROOT) == panel_hwnd {
+            return false;
+        }
+    }
 
     if hwnd == wp_hwnd || hwnd == workerw_hwnd || hwnd == defview_hwnd {
         return true;
@@ -459,7 +478,6 @@ pub fn ensure_attached(span_monitors: bool) {
         if current_parent.is_null()
             || expected_parent.is_null()
             || current_parent != expected_parent
-            || IsWindowVisible(expected_parent) == 0
         {
             let _ = attach_to_desktop(hwnd as isize, span_monitors);
         }
@@ -554,7 +572,8 @@ pub fn start_mouse_hook(app: AppHandle) {
 
             if let Some(app_handle) = APP_HANDLE.get() {
                 if left_just_pressed {
-                    let _ = app_handle.emit(
+                    let _ = app_handle.emit_to(
+                        "wallpaper",
                         "desktop-mouse",
                         DesktopMouseEvent {
                             action: "left_down",
@@ -566,7 +585,8 @@ pub fn start_mouse_hook(app: AppHandle) {
                         },
                     );
                 } else if left_just_released {
-                    let _ = app_handle.emit(
+                    let _ = app_handle.emit_to(
+                        "wallpaper",
                         "desktop-mouse",
                         DesktopMouseEvent {
                             action: "left_up",
@@ -578,7 +598,8 @@ pub fn start_mouse_hook(app: AppHandle) {
                         },
                     );
                 } else if moved {
-                    let _ = app_handle.emit(
+                    let _ = app_handle.emit_to(
+                        "wallpaper",
                         "desktop-mouse",
                         DesktopMouseEvent {
                             action: "move",

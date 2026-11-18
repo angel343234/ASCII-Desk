@@ -143,6 +143,9 @@
       }
     },
     dispatchMouse(type, rawX, rawY, vw, vh) {
+      // Never synthesize desktop mouse clicks/moves inside the Studio Panel window or its preview iframe!
+      if (!isWallpaperSceneFrame()) return;
+
       const scaleX = vw > 0 ? window.innerWidth / vw : 1;
       const scaleY = vh > 0 ? window.innerHeight / vh : 1;
       const x = rawX * scaleX;
@@ -256,6 +259,7 @@
   });
 
   function setupTauriListeners() {
+    if (!isWallpaperSceneFrame()) return;
     const tauriEvent = window.__TAURI__ && window.__TAURI__.event;
     const tauriCore = window.__TAURI__ && window.__TAURI__.core;
     if (tauriEvent && typeof tauriEvent.listen === "function") {

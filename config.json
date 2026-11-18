@@ -33,15 +33,15 @@
   "settings": {
     "ascii-koi": {
       "speed": 1.0,
-      "theme": "pond",
       "paused": false,
+      "theme": "pond",
       "showClock": false
     },
     "matrix-rain": {
-      "color": "#00ff66",
-      "speed": 1.0,
-      "charset": "katakana",
       "density": 0.85,
+      "charset": "katakana",
+      "speed": 1.0,
+      "color": "#00ff66",
       "paused": false
     }
   }
