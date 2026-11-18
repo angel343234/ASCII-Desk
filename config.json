@@ -32,17 +32,17 @@
   "span_monitors": false,
   "settings": {
     "ascii-koi": {
-      "paused": false,
-      "showClock": false,
+      "theme": "pond",
       "speed": 1.0,
-      "theme": "pond"
+      "showClock": false,
+      "paused": false
     },
     "matrix-rain": {
-      "density": 0.85,
       "speed": 1.0,
       "paused": false,
+      "color": "#00ff66",
       "charset": "katakana",
-      "color": "#00ff66"
+      "density": 0.85
     }
   }
 }

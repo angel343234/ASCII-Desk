@@ -174,6 +174,28 @@ pub fn attach_to_desktop(hwnd_isize: isize, span_monitors: bool) -> Result<(), S
             WORKERW_HWND.store(target_parent as isize, Ordering::SeqCst);
         }
 
+        // Remove any stale "ASCII Desk Wallpaper" child windows left inside WorkerW by killed processes
+        if !target_parent.is_null() {
+            let wp_title = wide_null("ASCII Desk Wallpaper");
+            let mut prev_child: HWND = std::ptr::null_mut();
+            loop {
+                let child = FindWindowExW(
+                    target_parent,
+                    prev_child,
+                    std::ptr::null(),
+                    wp_title.as_ptr(),
+                );
+                if child.is_null() {
+                    break;
+                }
+                if child != hwnd {
+                    ShowWindow(child, SW_HIDE);
+                    SetParent(child, std::ptr::null_mut());
+                }
+                prev_child = child;
+            }
+        }
+
         // Only attach if we already have the proper parent
         let current_parent = GetParent(hwnd);
         if !target_parent.is_null() {

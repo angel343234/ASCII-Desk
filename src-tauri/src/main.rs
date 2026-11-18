@@ -794,7 +794,27 @@ fn hide_panel(app: AppHandle) {
     }
 }
 
+fn kill_previous_instances() {
+    use std::os::windows::process::CommandExt;
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    let current_pid = std::process::id();
+    let filter = format!("PID ne {}", current_pid);
+    if let Ok(mut child) = std::process::Command::new("taskkill")
+        .creation_flags(CREATE_NO_WINDOW)
+        .args(["/F", "/IM", "ascii-desk.exe", "/FI", &filter])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+    {
+        let _ = child.wait();
+        // Brief pause so Windows releases WorkerW child handles and Tray icon cleanly
+        std::thread::sleep(Duration::from_millis(120));
+    }
+}
+
 fn main() {
+    kill_previous_instances();
+
     let (wallpapers_dir, config_path) = find_project_paths();
     let wallpapers = scan_wallpapers(&wallpapers_dir);
 
@@ -935,17 +955,6 @@ fn main() {
 
             if let Ok(hwnd) = wp_window.hwnd() {
                 let hwnd_val = hwnd.0 as isize;
-                unsafe {
-                    // Single-instance guard: if another instance already created our wallpaper window, exit cleanly
-                    let win_title: Vec<u16> = "ASCII Desk Wallpaper\0".encode_utf16().collect();
-                    let existing = windows_sys::Win32::UI::WindowsAndMessaging::FindWindowW(
-                        std::ptr::null(),
-                        win_title.as_ptr(),
-                    );
-                    if !existing.is_null() && (existing as isize) != hwnd_val {
-                        std::process::exit(0);
-                    }
-                }
 
                 // Perform WorkerW attachment and Progman readiness retries on a background thread
                 // so the main Win32 message loop starts immediately and never shows as Not Responding
