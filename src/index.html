@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASCII &amp; Shader Wallpaper Studio — SunOS Workstation 1.1</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MODE 1: DESKTOP WALLPAPER HOST (?role=wallpaper)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="wallpaper-root" class="hidden">
+    <iframe id="wallpaper-frame" title="ASCII Wallpaper"></iframe>
+    <video id="wallpaper-video" class="hidden" loop muted playsinline crossorigin="anonymous"></video>
+    <img id="wallpaper-image" class="hidden" alt="Wallpaper Source" crossorigin="anonymous">
+    <canvas id="wallpaper-gl-canvas" class="hidden"></canvas>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MODE 2: 1984 SUNOS WORKSTATION + SWISS EDITORIAL ZINE STUDIO (?role=panel)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="panel-root" class="hidden">
+    <!-- Top SunOS System Bar -->
+    <header class="studio-topbar" data-tauri-drag-region>
+      <div class="brand" data-tauri-drag-region>
+        <span class="brand-glyph" data-tauri-drag-region>SUN//84</span>
+        <div class="brand-titles" data-tauri-drag-region>
+          <h1 class="brand-title" data-tauri-drag-region>ASCII &amp; Shader Studio</h1>
+          <span class="brand-sep" data-tauri-drag-region>—</span>
+          <p class="brand-subtitle" id="status-badge">Motor Activo · 60 FPS WebGL2</p>
+        </div>
+      </div>
+
+      <div class="topbar-quick-toggles">
+        <label class="pill-toggle" title="Extiende el lienzo continuamente entre todos tus monitores">
+          <input type="checkbox" id="toggle-span-monitors" checked>
+          <span>[MULTIMONITOR]</span>
+        </label>
+        <label class="pill-toggle" title="Oculta o muestra los iconos del escritorio de Windows">
+          <input type="checkbox" id="toggle-hide-icons">
+          <span>[HIDE_ICONS]</span>
+        </label>
+        <label class="pill-toggle" title="Ejecutar automáticamente al iniciar sesión en Windows">
+          <input type="checkbox" id="toggle-autostart">
+          <span>[AUTO_BOOT]</span>
+        </label>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-pause" class="icon-btn" title="Pausar / Reanudar fondo de escritorio">⏸</button>
+        <button id="btn-close" class="icon-btn close-btn" title="Ocultar estudio en la bandeja">✕</button>
+      </div>
+    </header>
+
+    <!-- Main Split Workstation Layout -->
+    <div class="studio-workspace">
+      <!-- Center Area: 1-Bit Dithered Paper Field + SunTools Canvas Preview Window -->
+      <section class="studio-stage">
+        <div class="stage-hud-top">
+          <div class="editorial-heading">
+            <span class="editorial-kicker">EDITION // LIVE BUFFER</span>
+            <h2 class="editorial-display">the screen is <em>a living page</em></h2>
+          </div>
+          <div class="hud-chips-group">
+            <span class="hud-chip" id="hud-source-label">Fuente: ASCII Koi Pond</span>
+            <span class="hud-chip accent" id="hud-style-label">Shader: Original (Bypass)</span>
+            <span class="hud-chip mono" id="hud-fps">60 FPS</span>
+          </div>
+        </div>
+
+        <div class="stage-viewport-wrap" id="stage-viewport-wrap">
+          <div class="canvas-window-shell">
+            <div class="sun-titlebar">
+              <span class="sun-titlebar-text">Canvas Preview Tool 1.1 — /dev/fb0 [WebGL2]</span>
+              <span class="sun-titlebar-coords">X:0000 Y:0000 // 1:1_UNIT</span>
+            </div>
+            <div class="canvas-ruler-x">
+              <span>0</span><span>128</span><span>256</span><span>384</span><span>512</span><span>640</span><span>768</span><span>896</span><span>1024</span>
+            </div>
+            <div id="preview-stage" class="preview-stage">
+              <iframe id="preview-iframe" title="Interactive Preview"></iframe>
+              <video id="preview-video" class="hidden" loop muted playsinline crossorigin="anonymous"></video>
+              <img id="preview-image" class="hidden" alt="Preview Image" crossorigin="anonymous">
+              <canvas id="preview-gl-canvas" class="preview-gl-canvas hidden"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage-hud-bottom">
+          <span class="hud-hint"><em>Interactive specimen</em> — Haz clic sobre el lienzo para interactuar a 60 FPS</span>
+          <button id="btn-randomize" class="hud-action-btn" title="Generar combinación creativa aleatoria">[RANDOMIZE_SPECIMEN]</button>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: 3 Sequential SunOS Workstation Tools (No nodes, no wires) -->
+      <aside class="studio-sidebar">
+        <!-- BLOQUE 1 — 01 // SOURCE -->
+        <section class="studio-block">
+          <div class="sun-titlebar">
+            <span class="sun-titlebar-text">Source Tool 1.0 — [01 // SOURCE]</span>
+            <button id="btn-reset" class="sun-titlebar-btn" title="Restaurar parámetros de escena">RESET</button>
+          </div>
+
+          <div class="block-inner">
+            <div class="source-type-tabs" role="tablist">
+              <button type="button" class="source-tab active" data-source-type="interactive">INTERACTIVO</button>
+              <button type="button" class="source-tab" data-source-type="gif">GIF_ANIM</button>
+              <button type="button" class="source-tab" data-source-type="video">VIDEO</button>
+              <button type="button" class="source-tab" data-source-type="image">IMAGEN</button>
+            </div>
+
+            <!-- Sub-panel: Interactive Wallpaper -->
+            <div id="source-panel-interactive" class="source-subpanel">
+              <div class="control-row">
+                <label class="control-label" for="wallpaper-select">Escena Modular (/wallpapers)</label>
+              </div>
+              <select id="wallpaper-select" class="ctrl-select"></select>
+              <p id="wallpaper-desc" class="wallpaper-desc"></p>
+              <div id="controls-container" class="controls-list"></div>
+            </div>
+
+            <!-- Sub-panel: Local Video / GIF / Image File -->
+            <div id="source-panel-media" class="source-subpanel hidden">
+              <div class="file-drop-zone" id="file-drop-zone">
+                <input type="file" id="media-file-input" class="hidden" accept="video/mp4,video/webm,image/png,image/jpeg,image/webp,image/gif">
+                <p class="drop-title" id="media-file-name">/dev/null (Sin archivo)</p>
+                <p class="drop-subtitle" id="media-file-hint">Soporta MP4, WebM, GIF animado, PNG, JPG</p>
+                <button type="button" id="btn-browse-media" class="secondary-btn">[MOUNT_LOCAL_FILE...]</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BLOQUE 2 — 02 // STYLE_PROCESSOR -->
+        <section class="studio-block">
+          <div class="sun-titlebar">
+            <span class="sun-titlebar-text">Style Shader 1.1 — [02 // STYLE_PROCESSOR]</span>
+            <button id="btn-reset-shader" class="sun-titlebar-btn">DEFAULT</button>
+          </div>
+
+          <div class="block-inner">
+            <div class="shader-selector-group">
+              <input type="search" id="shader-search" class="ctrl-input" placeholder="grep style (e.g. LEGO, ASCII, CRT, Bayer)...">
+              <select id="shader-select" class="ctrl-select"></select>
+              <p id="shader-desc" class="wallpaper-desc"></p>
+            </div>
+
+            <!-- 4 Internal Parameter Tabs -->
+            <div class="param-tabs" role="tablist">
+              <button type="button" class="param-tab active" data-param-tab="style">STYLE</button>
+              <button type="button" class="param-tab" data-param-tab="depth">RELIEF_3D</button>
+              <button type="button" class="param-tab" data-param-tab="color">COLOR</button>
+              <button type="button" class="param-tab" data-param-tab="anim">MOTION</button>
+            </div>
+
+            <!-- Tab 1: Style -->
+            <div class="param-tab-content" id="tab-style">
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Cell / Block Pitch</span>
+                  <span class="control-value" id="val-cellSize">12 px</span>
+                </div>
+                <input type="range" id="sh-cellSize" min="4" max="48" step="1" value="12">
+              </div>
+
+              <div class="control-card" id="card-charset">
+                <div class="control-row">
+                  <span class="control-label">Glyph Ramp (ASCII)</span>
+                </div>
+                <input type="text" id="sh-charset" class="ctrl-input mono" value="@#$08Xx+=-;:..">
+              </div>
+
+              <div class="control-card" id="card-param1">
+                <div class="control-row">
+                  <span class="control-label" id="lbl-param1">Modulación de Estilo</span>
+                  <span class="control-value" id="val-param1">0.50</span>
+                </div>
+                <input type="range" id="sh-param1" min="0" max="1" step="0.01" value="0.5">
+              </div>
+
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Blend Mode &amp; Mix</span>
+                  <span class="control-value" id="val-opacity">100%</span>
+                </div>
+                <div class="split-row">
+                  <select id="sh-blendMode" class="ctrl-select">
+                    <option value="0">NORMAL</option>
+                    <option value="1">SCREEN</option>
+                    <option value="2">MULTIPLY</option>
+                    <option value="3">OVERLAY</option>
+                    <option value="4">ADDITIVE</option>
+                  </select>
+                  <input type="range" id="sh-opacity" min="0" max="1" step="0.02" value="1">
+                </div>
+              </div>
+
+              <div class="control-card compact-toggles">
+                <label class="control-row switch-wrap">
+                  <span class="control-label">Invert 1-Bit</span>
+                  <input type="checkbox" id="sh-invert">
+                  <span class="switch"></span>
+                </label>
+                <label class="control-row switch-wrap">
+                  <span class="control-label">Dot Matrix</span>
+                  <input type="checkbox" id="sh-dotGrid">
+                  <span class="switch"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Tab 2: Depth & Relief -->
+            <div class="param-tab-content hidden" id="tab-depth">
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">3D Stud / Block Relief</span>
+                  <span class="control-value" id="val-relief">0.25</span>
+                </div>
+                <input type="range" id="sh-relief" min="0" max="1.5" step="0.05" value="0.25">
+              </div>
+
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Bevel Edge Width</span>
+                  <span class="control-value" id="val-bevel">0.25</span>
+                </div>
+                <input type="range" id="sh-bevel" min="0.05" max="0.8" step="0.05" value="0.25">
+              </div>
+
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Light Azimuth</span>
+                  <span class="control-value" id="val-lightAngle">135°</span>
+                </div>
+                <input type="range" id="sh-lightAngle" min="0" max="360" step="5" value="135">
+              </div>
+            </div>
+
+            <!-- Tab 3: Intensity & Color -->
+            <div class="param-tab-content hidden" id="tab-color">
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Gain / Intensity</span>
+                  <span class="control-value" id="val-intensity">1.00</span>
+                </div>
+                <input type="range" id="sh-intensity" min="0.1" max="2.5" step="0.05" value="1.0">
+              </div>
+
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Contrast · Luma · Chroma</span>
+                </div>
+                <div class="triple-sliders">
+                  <div>
+                    <small>CONT</small>
+                    <input type="range" id="sh-contrast" min="0.4" max="2.2" step="0.05" value="1.0">
+                  </div>
+                  <div>
+                    <small>LUMA</small>
+                    <input type="range" id="sh-brightness" min="-0.4" max="0.4" step="0.02" value="0.0">
+                  </div>
+                  <div>
+                    <small>SAT</small>
+                    <input type="range" id="sh-saturation" min="0.0" max="2.0" step="0.05" value="1.0">
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Quantized Color Palette</span>
+                </div>
+                <select id="sh-palette" class="ctrl-select">
+                  <option value="0">00 // FULL_SPECTRUM</option>
+                  <option value="1">01 // GAMEBOY_DMG_4</option>
+                  <option value="2">02 // PICO8_CONSOLE</option>
+                  <option value="3">03 // IBM_CGA_4</option>
+                  <option value="4">04 // AMBER_CRT_P3</option>
+                  <option value="5">05 // MATRIX_PHOSPHOR</option>
+                </select>
+              </div>
+
+              <div class="control-card">
+                <label class="control-row switch-wrap">
+                  <span class="control-label">Override Ink / Paper Colors</span>
+                  <input type="checkbox" id="sh-useCustomColors">
+                  <span class="switch"></span>
+                </label>
+                <div class="control-row" style="margin-top:4px;">
+                  <div class="color-picker-wrap">
+                    <span class="control-label">INK</span>
+                    <input type="color" id="sh-fgColor" value="#000000">
+                  </div>
+                  <div class="color-picker-wrap">
+                    <span class="control-label">PAPER</span>
+                    <input type="color" id="sh-bgColor" value="#ffffff">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 4: Animation -->
+            <div class="param-tab-content hidden" id="tab-anim">
+              <div class="control-card">
+                <div class="control-row">
+                  <span class="control-label">Clock Frequency (Speed)</span>
+                  <span class="control-value" id="val-animSpeed">1.0x</span>
+                </div>
+                <input type="range" id="sh-animSpeed" min="0" max="3.0" step="0.1" value="1.0">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BLOQUE 3 — 03 // OUTPUT -->
+        <section class="studio-block output-block">
+          <div class="sun-titlebar">
+            <span class="sun-titlebar-text">Output Tool 1.0 — [03 // OUTPUT]</span>
+            <span class="sun-titlebar-coords">COMMIT</span>
+          </div>
+
+          <div class="block-inner">
+            <div class="control-row">
+              <span class="control-label">Raster Aspect</span>
+              <div class="aspect-pills" id="aspect-pills">
+                <button type="button" class="aspect-pill active" data-fit="0">FILL</button>
+                <button type="button" class="aspect-pill" data-fit="1">FIT</button>
+                <button type="button" class="aspect-pill" data-fit="2">16:9</button>
+                <button type="button" class="aspect-pill" data-fit="3">1:1</button>
+              </div>
+            </div>
+
+            <div class="output-actions">
+              <button type="button" id="btn-apply-wallpaper" class="primary-cta-btn">
+                [APPLY_TO_DESKTOP_WALLPAPER]
+              </button>
+              <div class="export-row">
+                <button type="button" id="btn-export-png" class="secondary-btn">[DUMP_PNG]</button>
+                <button type="button" id="btn-export-webm" class="secondary-btn">[REC_WEBM_5S]</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script src="shaders/registry.js"></script>
+  <script src="bridge.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

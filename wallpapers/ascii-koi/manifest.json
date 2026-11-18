@@ -1,0 +1,39 @@
+{
+  "name": "ASCII Koi Pond",
+  "author": "pursurer (adapted for ASCII Desk)",
+  "description": "Estanque interactivo continuo de peces Koi en arte ASCII. Haz clic izquierdo en el escritorio para alimentar a los peces.",
+  "controls": [
+    {
+      "id": "theme",
+      "label": "Modo de agua",
+      "type": "select",
+      "default": "pond",
+      "options": [
+        { "label": "1 - Estanque (Pond)", "value": "pond" },
+        { "label": "2 - Agua Oscura (Black)", "value": "black" },
+        { "label": "3 - Agua Clara (Light)", "value": "light" }
+      ]
+    },
+    {
+      "id": "speed",
+      "label": "Velocidad de simulación",
+      "type": "slider",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.1,
+      "default": 1.0
+    },
+    {
+      "id": "showClock",
+      "label": "Mostrar reloj central",
+      "type": "toggle",
+      "default": true
+    },
+    {
+      "id": "paused",
+      "label": "Pausar simulación",
+      "type": "toggle",
+      "default": false
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Matrix Digital Rain",
+  "author": "ASCII Desk",
+  "description": "Lluvia digital interactiva estilo Matrix. Reacciona al movimiento y clics del cursor en el escritorio.",
+  "controls": [
+    {
+      "id": "speed",
+      "label": "Velocidad de caída",
+      "type": "slider",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.1,
+      "default": 1.0
+    },
+    {
+      "id": "color",
+      "label": "Color de caracteres",
+      "type": "color",
+      "default": "#00ff66"
+    },
+    {
+      "id": "density",
+      "label": "Densidad de columnas",
+      "type": "slider",
+      "min": 0.2,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.85
+    },
+    {
+      "id": "charset",
+      "label": "Conjunto de caracteres",
+      "type": "select",
+      "default": "katakana",
+      "options": [
+        { "label": "Katakana + ASCII", "value": "katakana" },
+        { "label": "Binario (0 / 1)", "value": "binary" },
+        { "label": "Hexadecimal", "value": "hex" }
+      ]
+    },
+    {
+      "id": "paused",
+      "label": "Pausar animación",
+      "type": "toggle",
+      "default": false
+    }
+  ]
+}

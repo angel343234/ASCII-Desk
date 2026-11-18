@@ -1,0 +1,11 @@
+# Build outputs
+src-tauri/target/
+node_modules/
+
+# Synced runtime wallpapers copy (source of truth is /wallpapers)
+src/wallpapers/
+
+# Temporary logs & OS files
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+{
+  "name": "ascii-desk",
+  "version": "0.1.0",
+  "description": "Motor ligero de fondos de pantalla interactivos y modulares para Windows",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  }
+}
