@@ -178,9 +178,7 @@ Cualquier carpeta añadida dentro de `/wallpapers/<nombre-fondo>/` con un archiv
       "step": 0.1,
       "default": 1.0
     }
-
-### Credits to: https://asciiart.website/art/458
-
   ]
 }
 ```
+### Credits to: https://asciiart.website/art/458
